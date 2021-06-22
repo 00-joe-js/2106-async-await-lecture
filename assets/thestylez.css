@@ -1,0 +1,11 @@
+form > div {
+    margin-bottom: 40px;
+}
+
+form select {
+    width: 300px;
+}
+
+form button {
+    background: lightblue;
+}

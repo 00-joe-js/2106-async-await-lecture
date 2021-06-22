@@ -1,0 +1,8 @@
+{
+  "name": "2106-async-await-lecture",
+  "version": "1.0.0",
+  "author": "Joe Alves @ Fullstack Academy",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
