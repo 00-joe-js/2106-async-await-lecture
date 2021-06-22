@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 
 const fs = require("fs");
+const { promisify } = require('util');
+const fsReadFilePromise = promisify(fs.readFile);
 
 const createHomepageHtmlString = require("./make-homepage-html");
 
@@ -10,23 +12,22 @@ const availableFirstNames = require("./data/possible-names.json");
 
 app.use(express.static(__dirname + "/assets"));
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+    try {
+        const fileContents = await fsReadFilePromise(__dirname + "/data/submissions.txt", "utf-8");
+        const names = fileContents.split("\n");
 
-    fs.readFile(__dirname + "/data/submissions.txt", "utf-8", (err, fileContents) => {
-        if (err) {
-            res.status(500); // Internal server error.
-            res.send("Sorry, file read went wrong. :( I dunno why.");
-        } else {
-            const names = fileContents.split("\n");
-            res.send(
-                createHomepageHtmlString(
-                    availableAdjectives,
-                    availableFirstNames,
-                    names
-                )
-            );
-        }
-    });
+        res.send(
+            createHomepageHtmlString(
+                availableAdjectives,
+                availableFirstNames,
+                names
+            )
+        );
+    } catch (e) {
+        res.status(500);
+        res.send("Sorry, this broke. :(")
+    }
 });
 
 app.use(express.urlencoded({ extended: false }));
@@ -36,7 +37,7 @@ app.post("/submit-name", (req, res) => {
 
     console.log(chosenAdjective, chosenName);
     fs.appendFile(
-        __dirname + "/data/submissions.txt", 
+        __dirname + "/data/submissions.txt",
         `${chosenAdjective} ${chosenName}\n`,
         (err) => {
             if (err) {
